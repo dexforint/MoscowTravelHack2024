@@ -205,7 +205,7 @@ def search_objects(search_query, n_limit=5):
         n_inter_tags = len(inter_tags)
 
         score = (
-            sim + n_inter_cats + 2 * n_inter_tags + 2 * cost_estimate_score - 3
+            sim + n_inter_cats / 2 + 2 * n_inter_tags + cost_estimate_score
         )  # + estimate_time_score
         if score < 0:
             continue
@@ -215,8 +215,8 @@ def search_objects(search_query, n_limit=5):
                 score,
                 sim,
                 n_inter_cats,
-                2 * n_inter_tags,
-                2 * cost_estimate_score,
+                n_inter_tags,
+                cost_estimate_score,
             )
         )
 
@@ -244,7 +244,7 @@ def get_object_justification_messages(objects, query):
     Описания мест и мероприятий:
     {objects_description}
 
-    Твоя задача - для каждого объекта (место или мероприятие) дать привлекательное обоснование, почему пользователю нужно пойти именно туда, учитывая запрос пользователя.
+    Твоя задача - для каждого объекта (место или мероприятие) дать привлекательное обоснование, почему пользователю нужно пойти именно туда, основываясь на запросе пользователя.
     Дай ответ исключительно в формате JSON: массив из обоснований (строк).
     """
 
@@ -288,26 +288,27 @@ def process_query(query, history=[]):
     #     return response, history
 
     objs = search_objects(search_query)
-    messages = get_object_justification_messages(objs, query)
+    # messages = get_object_justification_messages(objs, query)
 
-    answer2 = get_answer(messages)
-    if "Не люблю менять тему разговора, но вот сейчас тот самый случай." in answer2:
-        response = {
-            "text": "Не люблю менять тему разговора, но вот сейчас тот самый случай.",
-        }
-        return response
+    # answer2 = get_answer(messages)
+    # if "Не люблю менять тему разговора, но вот сейчас тот самый случай." in answer2:
+    #     response = {
+    #         "text": "Не люблю менять тему разговора, но вот сейчас тот самый случай.",
+    #     }
+    #     return response
+    # print("#######################")
+    # print("answer2", answer2)
     print("#######################")
-    print("answer2", answer2)
-    print("#######################")
-    justifications = parse_json(answer2, braces_type="[]")
+    # justifications = parse_json(answer2, braces_type="[]")
 
     json_objs = []
-    for obj, justification in zip(objs, justifications):
+    # for obj, justification in zip(objs, justifications):
+    for obj in objs:
         json_objs.append(
             {
                 "id": obj["id"],
                 "title": obj["title"],
-                "description": justification,
+                "description": obj["description"],
                 "image_src": (
                     obj["images"][0]
                     if len(obj["images"]) > 0
