@@ -3,6 +3,7 @@ from fastapi import FastAPI, File, Form, UploadFile, Request, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from tools import process_query, id2obj
+import sys, os
 
 app = FastAPI()
 
@@ -29,12 +30,14 @@ async def get_objects(request: Request, response: Response):
     data = await request.body()
     text = data.decode("utf-8")
 
-    try:
-        response = process_query(text, history)
-        print("response:", response)
-    except Exception as e:
-        response = {"text": f"Ошибка: {e}"}
-        print("Exception:", e)
+    # try:
+    response = process_query(text, history)
+    print("response:", response)
+    # except Exception as e:
+    #     response = {"text": f"Ошибка: {e}"}
+    #     exc_type, exc_obj, exc_tb = sys.exc_info()
+    #     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    #     print(exc_type, fname, exc_tb.tb_lineno)
 
     return response
 

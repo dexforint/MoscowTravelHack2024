@@ -103,6 +103,12 @@ def parse_json(text, braces_type="{}"):  # !!! Доделать
     end_index = text.rfind(braces_type[1]) + 1
     json_substring = text[start_index:end_index]
 
+    dv_counter = sum([1 for c in json_substring if c == ":"])
+    za_counter = sum([1 for c in json_substring if c == ","])
+
+    if braces_type == "[]" and za_counter > dv_counter:
+        json_substring = json_substring.replace(":", ",")
+
     json_data = json.loads(json_substring)
     return json_data
 
@@ -199,16 +205,27 @@ def search_objects(search_query, n_limit=5):
         n_inter_tags = len(inter_tags)
 
         score = (
-            sim + n_inter_cats + 2 * n_inter_tags + 2 * cost_estimate_score
+            sim + n_inter_cats + 2 * n_inter_tags + 2 * cost_estimate_score - 3
         )  # + estimate_time_score
         if score < 0:
             continue
-        scores.append((obj_id, score))
+        scores.append(
+            (
+                obj_id,
+                score,
+                sim,
+                n_inter_cats,
+                2 * n_inter_tags,
+                2 * cost_estimate_score,
+            )
+        )
 
     scores.sort(key=lambda el: -el[1])
+    print("TOP score:", scores[0])
     obj_ids = [el[0] for el in scores[:n_limit]]
 
     objs = [id2obj[obj_id] for obj_id in obj_ids]
+    print("TOP object:", objs[0]["title"], objs[0]["tags"], objs[0]["categories"])
 
     return objs
 
@@ -228,7 +245,7 @@ def get_object_justification_messages(objects, query):
     {objects_description}
 
     Твоя задача - для каждого объекта (место или мероприятие) дать привлекательное обоснование, почему пользователю нужно пойти именно туда, учитывая запрос пользователя.
-    Дай ответ исключительно в формате JSON: список из обоснований (строк).
+    Дай ответ исключительно в формате JSON: массив из обоснований (строк).
     """
 
     messages.append(HumanMessage(content=prompt))

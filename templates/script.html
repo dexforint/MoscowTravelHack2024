@@ -1,22 +1,4 @@
 <script>
-    function test(text) {
-
-        fetch('{{ request.url }}test_objects', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain'
-            },
-            body: text
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Ответ от сервера:', data);
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-            });
-    }
-
     //<!-- !!! --> Modal Window
 
     const modal = document.getElementById("modal");
@@ -69,6 +51,10 @@
                 modal.querySelector(".object-text").textContent = response['description'];
                 modal.querySelector(".object-image").src = response['images'][0];
 
+                modal.querySelector(".object-age_restriction").textContent = response['age_restriction'];
+                modal.querySelector(".object-address").textContent = response['address'];
+                modal.querySelector(".object-schedule").textContent = String(response['dates']);
+
             })
             .catch(error => {
                 console.error('Ошибка:', error);
@@ -118,7 +104,7 @@
                         objectClone.querySelector('.chat-result-title').textContent = object['title'];
                         objectClone.querySelector('.chat-result-text').textContent = object['description'];
                         objectClone.querySelector(".chat-result-desc").dataset.objid = object['id'];
-                        container.append(objectClone);
+                        container.insertBefore(objectClone, container.firstChild);
                     }
                 } else {
                     container.parentNode.removeChild(container);
