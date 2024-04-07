@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Мини-редактор</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+
+        #toolbar {
+            width: 100px;
+            margin-right: 10px;
+        }
+
+        .tool {
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        #canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toolbar">
+        <input type="color" id="colorPicker" class="tool">
+        <button id="clearCanvas" class="tool">Очистить</button>
+    </div>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let color = '#000000';
+
+        document.getElementById('colorPicker').onchange = function (e) {
+            color = e.target.value;
+        };
+
+        canvas.onmousedown = function (e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        };
+
+        canvas.onmousemove = function (e) {
+            if (isDrawing) {
+                ctx.strokeStyle = color;
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            }
+        };
+
+        canvas.onmouseup = function () {
+            isDrawing = false;
+        };
+
+        document.getElementById('clearCanvas').onclick = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        };
+    </script>
+</body>
+
+</html>

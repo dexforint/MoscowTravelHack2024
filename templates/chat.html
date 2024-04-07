@@ -1,0 +1,169 @@
+{% extends 'RUSSPASS.html' %}
+
+{% block CSS %}
+<link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block CHAT %}
+<div id="chat" class="chat-chat">
+</div>
+<div class="chat-inputfield SearchByTabs_search__8yJOi">
+    <div class="chat-input-container SearchByTabs_inputWrapper__Xk005">
+        <div id="preview-container"></div>
+        <input id="chat-input" class="chat-input SearchByTabs_input__UQxW3"
+            placeholder="Я умный чат-бот, с помощью которого вы можете найти подходящие вам места и мероприятия..."
+            value="">
+    </div>
+
+    <!-- <button id="uploadImage" class="chat-button button_wrap__lilcJ button_primary__pu9j8 SearchByTabs_searchBtn__vWXAr">
+
+        <svg width="800px" height="800px" viewBox="-2 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <g id="Lager_3" data-name="Lager 3" transform="translate(-2 0)">
+                <g id="Group_2" data-name="Group 2">
+                    <path id="Path_4" data-name="Path 4"
+                        d="M28,14H23.98A1.979,1.979,0,0,0,22,15.98v.04A1.979,1.979,0,0,0,23.98,18H25a1,1,0,0,1,1,1v8a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V19a1,1,0,0,1,1-1H8.02A1.979,1.979,0,0,0,10,16.02v-.04A1.979,1.979,0,0,0,8.02,14H4a2,2,0,0,0-2,2V30a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V16A2,2,0,0,0,28,14Z"
+                        fill="#100a0b" fill-rule="evenodd" />
+                    <path id="Path_5" data-name="Path 5"
+                        d="M11.413,9.387,14,6.754V23a1,1,0,0,0,1,1h2a1,1,0,0,0,1-1V7.057l.26.042L20.587,9.4a2.017,2.017,0,0,0,2.833,0,1.969,1.969,0,0,0,0-2.807L17.346.581a2.017,2.017,0,0,0-2.833,0l-5.934,6a1.97,1.97,0,0,0,0,2.806A2.016,2.016,0,0,0,11.413,9.387Z"
+                        fill="#100a0b" fill-rule="evenodd" />
+                </g>
+            </g>
+        </svg>
+
+    </button> -->
+
+
+    <button id="recordButton"
+        class="chat-button chat-microphone-button button_wrap__lilcJ button_primary__pu9j8 SearchByTabs_searchBtn__vWXAr">
+        <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V22M8 22H16M12 15C10.3431 15 9 13.6569 9 12V5C9 3.34315 10.3431 2 12 2C13.6569 2 15 3.34315 15 5V12C15 13.6569 13.6569 15 12 15Z"
+                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+    </button>
+    <!-- <button id="openModal">Открыть окно</button> -->
+
+</div>
+{% endblock %}
+
+{% block OVERLAY %}
+<template id="serviceMessageContainer">
+    <div class="chat-service-message-container">
+        <div class="chat-service-message">
+            <div class="chat-service-message-text">Вот список мест, где вы можете прогуляться:</div>
+            <div class="chat-service-message-results-container">
+
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="objectTemplate">
+    <div class="chat-result-container">
+        <img class="chat-result-image" src="https://pic.rutubelist.ru/video/2f/ea/2fea82008640db90e0f3012088a03835.jpg"
+            alt="">
+        <button class="chat-result-desc" onclick="openModal(this)">
+            <div class="chat-result-text-container">
+                <div class="chat-result-title">Московский планетарий</div>
+                <div class="chat-result-text">
+                    Уникальное место в Москве, дающее возможность перемещаться в
+                    пространстве и времени, постигая себя и Вселенную. В
+                    Большом Звездном зале можно посмотреть на звезды на самом большом куполе Европы и один
+                    из 8 полнокупольных
+                    научно-популярных фильмов о космосе. За час до сеанса предлагают познакомиться с
+                    экспозицией выставочного зала,
+                    названного в честь музы астрономии Урании и узнать об истории астрономии и устройстве
+                    Солнечной системы. В Малом
+                    Звездном зале можно стать героем выбранного фильма благодаря купольному залу,
+                    динамическим креслам и эффекту
+                    стереопроекции.
+                </div>
+            </div>
+            <div class="chat-result-buttons-container">
+                <div class="chat-result-price-container">
+                    <div class="chat-result-price">
+                        Посмотреть
+                    </div>
+                </div>
+            </div>
+        </button>
+        <button class="chat-result-like-container">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M4.15693 4.34162C6.66118 2.18311 9.99417 2.8172 11.9929 5.17442C13.9916 2.8172 17.2815 2.20582 19.8288 4.34162C22.3761 6.47743 22.6856 10.1091 20.719 12.6619C19.0839 14.7845 13.6444 19.5496 12.0226 20.9985C10.4008 19.5496 4.90182 14.7845 3.26672 12.6619C1.30012 10.1091 1.65269 6.50014 4.15693 4.34162Z"
+                    fill="#1D1D1D" fill-opacity="0.3"></path>
+                <path
+                    d="M11.9929 5.17442L11.2302 5.82115L11.9929 6.72068L12.7556 5.82115L11.9929 5.17442ZM4.15693 4.34162L3.50405 3.58417H3.50405L4.15693 4.34162ZM3.26672 12.6619L2.47453 13.2722H2.47453L3.26672 12.6619ZM20.719 12.6619L21.5112 13.2722L20.719 12.6619ZM19.8288 4.34162L20.4713 3.57534V3.57534L19.8288 4.34162ZM12.0226 20.9985L11.3564 21.7443C11.7359 22.0833 12.3094 22.0833 12.6889 21.7443L12.0226 20.9985ZM12.7556 4.5277C10.4636 1.82461 6.50236 0.999805 3.50405 3.58417L4.80982 5.09908C6.82001 3.36642 9.52471 3.80979 11.2302 5.82115L12.7556 4.5277ZM3.50405 3.58417C0.600842 6.08656 0.181347 10.2954 2.47453 13.2722L4.05892 12.0517C2.4189 9.92273 2.70453 6.91371 4.80982 5.09908L3.50405 3.58417ZM21.5112 13.2722C23.7957 10.3067 23.4412 6.06544 20.4713 3.57534L19.1863 5.10791C21.3111 6.88942 21.5756 9.9114 19.9268 12.0517L21.5112 13.2722ZM20.4713 3.57534C17.4402 1.03387 13.5297 1.81566 11.2302 4.5277L12.7556 5.82115C14.4535 3.81873 17.1228 3.37776 19.1863 5.10791L20.4713 3.57534ZM2.47453 13.2722C3.35414 14.414 5.20556 16.1947 6.97296 17.8191C8.7613 19.4628 10.558 21.031 11.3564 21.7443L12.6889 20.2528C11.8654 19.5172 10.1017 17.9783 8.32636 16.3466C6.53003 14.6956 4.8144 13.0324 4.05892 12.0517L2.47453 13.2722ZM12.6889 21.7443C13.4928 21.0261 15.2697 19.4622 17.0456 17.8163C18.7992 16.191 20.6333 14.4119 21.5112 13.2722L19.9268 12.0517C19.1697 13.0346 17.4665 14.6993 15.6861 16.3494C13.928 17.9789 12.1743 19.5221 11.3564 20.2528L12.6889 21.7443Z"
+                    fill="white"></path>
+            </svg>
+        </button>
+    </div>
+</template>
+
+<template id="waitingTemplate">
+    <div class="chat-wait-container">
+        <div class="loading-indicator chat-wait">
+            <div class="chat-wait-dot chat-wait-dot1"></div>
+            <div class="chat-wait-dot chat-wait-dot2"></div>
+            <div class="chat-wait-dot chat-wait-dot3"></div>
+        </div>
+    </div>
+</template>
+
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <div class="object-slider">
+            <img class="object-image"
+                src="https://media.kudago.com/images/place/ec/bc/ecbc019befb831d812e6e392a3158c67.jpg" alt="">
+        </div>
+        <div class="object-description">
+            <div class="object-category">Развлечения</div>
+            <div class="object-title">Московский Планетарий</div>
+            <div class="object-text">Уникальное место в Москве, дающее возможность перемещаться в пространстве и
+                времени, постигая себя и Вселенную. В
+                Большом Звездном зале можно посмотреть на звезды на самом большом куполе Европы и один из 8
+                полнокупольных
+                научно-популярных фильмов о космосе. За час до сеанса предлагают познакомиться с экспозицией
+                выставочного зала,
+                названного в честь музы астрономии Урании и узнать об истории астрономии и устройстве Солнечной системы.
+                В Малом
+                Звездном зале можно стать героем выбранного фильма благодаря купольному залу, динамическим креслам и
+                эффекту
+                стереопроекции.
+            </div>
+            <div class="object-schedule">
+                <div class="object-schedule-header cell">
+                    <span class="cell__icon-left">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            class="work-days__button-icon">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V12C11.25 12.2508 11.3753 12.4849 11.584 12.624L14.584 14.624C14.9286 14.8538 15.3943 14.7607 15.624 14.416C15.8538 14.0714 15.7607 13.6057 15.416 13.376L12.75 11.5986V8Z"
+                                fill="#1D1D1D"></path>
+                        </svg>
+                    </span>
+                    <div class="cell__content">Открыто до 21:00</div>
+                    <span class="cell__icon-right">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            class="work-days__button-arrow work-days__button-arrow_open">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M5.46967 9.46967C5.76256 9.17678 6.23744 9.17678 6.53033 9.46967L12 14.9393L17.4697 9.46967C17.7626 9.17678 18.2374 9.17678 18.5303 9.46967C18.8232 9.76256 18.8232 10.2374 18.5303 10.5303L12.5303 16.5303C12.2374 16.8232 11.7626 16.8232 11.4697 16.5303L5.46967 10.5303C5.17678 10.2374 5.17678 9.76256 5.46967 9.46967Z"
+                                fill="#1D1D1D"></path>
+                        </svg>
+                    </span>
+
+                </div>
+
+            </div>
+            <div class="activity-button-container">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+{% endblock %}
+
+{% block SCRIPT %}
+{% include 'script.html' %}
+{% endblock %}

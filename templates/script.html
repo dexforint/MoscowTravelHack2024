@@ -1,0 +1,256 @@
+<script>
+    function test(text) {
+
+        fetch('{{ request.url }}test_objects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: text
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Ответ от сервера:', data);
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+    }
+
+    //<!-- !!! --> Modal Window
+
+    const modal = document.getElementById("modal");
+    const overlay = document.getElementById("overlay");
+
+    // openModalButton.addEventListener("click", () => {
+    //     modal.classList.add("open");
+    //     overlay.style.display = "block";
+    //     document.body.classList.add("modal-open");
+    // });
+
+    overlay.addEventListener("click", () => {
+        modal.classList.remove("open");
+        overlay.style.display = "none";
+        document.body.classList.remove("modal-open");
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target == overlay) {
+            modal.classList.remove("open");
+            overlay.style.display = "none";
+            document.body.classList.remove("modal-open");
+        }
+    });
+
+    function openModalWindow() {
+        modal.classList.add("open");
+        overlay.style.display = "block";
+        document.body.classList.add("modal-open");
+    }
+
+    function openModal(element) {
+        let objId = element.dataset.objid;
+
+        fetch('{{ request.url }}get_object_info', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: String(objId)
+        })
+            .then(response => response.json())
+            .then(response => {
+                console.log(response);
+
+                openModalWindow();
+
+                modal.querySelector(".object-category").textContent = response['main_cat'];
+                modal.querySelector(".object-title").textContent = response['title'];
+                modal.querySelector(".object-text").textContent = response['description'];
+                modal.querySelector(".object-image").src = response['images'][0];
+
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+
+    }
+
+    //openModalButton.click();
+
+    const chat = document.getElementById("chat");
+    const chatInput = document.getElementById('chat-input');
+    const waitingTemplate = document.getElementById("waitingTemplate");
+    const objectTemplate = document.getElementById("objectTemplate");
+    const serviceMessageContainer = document.getElementById("serviceMessageContainer");
+
+    let iCanSendMessage = true;
+
+    function openChat() {
+        chat.classList.add("open");
+    }
+
+    //openChat();
+
+    function textRequest(text) {
+
+        fetch('{{ request.url }}get_objects', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: text
+        })
+            .then(response => response.json())
+            .then(response => {
+                console.log(response);
+                let serviceMessage = document.importNode(serviceMessageContainer.content, true);
+                serviceMessage.querySelector(".chat-service-message-text").textContent = response['text']
+                let container = serviceMessage.querySelector(".chat-service-message-results-container");
+
+                if (('objects' in response) && (response['objects'].length > 0)) {
+                    let objects = response['objects'];
+                    for (var i = objects.length - 1; i >= 0; i--) {
+                        let object = objects[i];
+                        let objectClone = document.importNode(objectTemplate.content, true);
+
+                        objectClone.querySelector('.chat-result-image').src = object['image_src'];
+                        objectClone.querySelector('.chat-result-title').textContent = object['title'];
+                        objectClone.querySelector('.chat-result-text').textContent = object['description'];
+                        objectClone.querySelector(".chat-result-desc").dataset.objid = object['id'];
+                        container.append(objectClone);
+                    }
+                } else {
+                    container.parentNode.removeChild(container);
+                }
+
+                removeWaiting();
+                chat.append(serviceMessage);
+
+                iCanSendMessage = true;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+
+
+    }
+
+    function addWaiting() {
+        const clone = document.importNode(waitingTemplate.content, true);
+        chat.appendChild(clone);
+    }
+
+    function removeWaiting() {
+        let elements = chat.getElementsByClassName("chat-wait-container");
+
+        for (var i = elements.length - 1; i >= 0; i--) {
+            elements[i].parentNode.removeChild(elements[i]);
+        }
+    }
+
+    function sendMyMessage(text) {
+        let msgWrap = document.createElement("div");
+        msgWrap.classList.add("chat-my-message-container");
+
+        let msg = document.createElement("div");
+        msg.classList.add("chat-my-message");
+        msg.innerText = text;
+
+        msgWrap.append(msg);
+        chat.append(msgWrap);
+        chatInput.value = "";
+        addWaiting();
+        chat.scrollTop = chat.scrollHeight;
+
+        iCanSendMessage = false;
+
+        textRequest(text);
+    }
+
+    function sendServiceMessage() {
+
+        iCanSendMessage = true;
+    }
+
+    chatInput.addEventListener('keydown', function (event) {
+        let value = chatInput.value.trim();
+
+        if ((event.key === 'Enter') && (value.length > 4) && (iCanSendMessage == true)) {
+            openChat();
+            sendMyMessage(value);
+        }
+    });
+
+    const recordButton = document.getElementById('recordButton');
+    let mediaRecorder;
+    let audioChunks = [];
+
+    async function startRecording() {
+        recordButton.classList.add('red-button');
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.addEventListener('dataavailable', event => {
+            audioChunks.push(event.data);
+        });
+        mediaRecorder.addEventListener('stop', async () => {
+            const audioBlob = new Blob(audioChunks, { 'type': 'audio/mpeg' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            console.log(data);
+            audioChunks = [];
+        });
+        mediaRecorder.start();
+    }
+
+    function stopRecording() {
+        recordButton.classList.remove('red-button');
+        mediaRecorder.stop();
+    }
+
+    recordButton.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            stopRecording();
+        } else {
+            startRecording();
+        }
+    });
+
+
+    function previewImage() {
+        var fileInput = document.getElementById('fileInput');
+        var image = document.getElementById('image');
+        var uploadButton = document.getElementById('uploadButton');
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            image.src = e.target.result;
+            uploadButton.style.display = 'block';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    function uploadImage() {
+        var img = document.getElementById('image');
+        fetch('/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ image: img.src })
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+    }
+
+</script>
